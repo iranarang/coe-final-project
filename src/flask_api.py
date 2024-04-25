@@ -8,7 +8,7 @@ from collections import OrderedDict
 # Used ChatGPT to fix errors, to fix test cases, format data, and error handling
 
 app = Flask(__name__)
-rd = redis.Redis(host='localhost', port=6379, db=0)
+rd = redis.Redis(host='redis-db', port=6379, db=0)
 
 def load_data_into_redis():
     """

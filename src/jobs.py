@@ -4,7 +4,7 @@ import redis
 from hotqueue import HotQueue
 import os
 
-_redis_ip = os.environ.get('REDIS_IP', 'localhost')
+_redis_ip = os.environ.get('REDIS_IP', 'redis-db')
 _redis_port = '6379'
 
 # Used ChatGPT to fix errors, to fix test cases, format data, and error handling
@@ -20,15 +20,15 @@ def _generate_jid():
     """ 
     return str(uuid.uuid4())
 
-def _instantiate_job(jid, status, start_date_approved, end_date_approved):
+def _instantiate_job(jid, status, start_year, end_year):
     """
     Create the job object description as a python dictionary. Requires the job id,
     status, start and end parameters.
     """
     return {'id': jid,
             'status': status,
-            'start_date_approved': start_date_approved,
-            'end_date_approved': end_date_approved }
+            'start_year': start_year,
+            'end_year': end_year }
 
 def _save_job(jid, job_dict):
     """Save a job object in the Redis database."""
@@ -40,10 +40,10 @@ def _queue_job(jid):
     q.put(jid)
     return
 
-def add_job(start_date_approved, end_date_approved, status="submitted"):
+def add_job(start_year, end_year, status="submitted"):
     """Add a job to the redis queue."""
     jid = _generate_jid()
-    job_dict = _instantiate_job(jid, status, start_date_approved, end_date_approved)
+    job_dict = _instantiate_job(jid, status, start_year, end_year)
     _save_job(jid, job_dict)
     _queue_job(jid)
     return job_dict
@@ -61,9 +61,9 @@ def update_job_status(jid, status):
     else:
         raise Exception()
 
-def store_job_result(jid, locus_group_counts):
+def store_job_result(jid, car_count_per_year):
     """
     Store the results from the worker file into the results Redis database.
     """
-    results.set(jid, json.dumps(locus_group_counts))
+    results.set(jid, json.dumps(car_count_per_year))
 
