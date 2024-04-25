@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-#from jobs import add_job, get_job_by_id, rd, jdb, results
+from jobs import add_job, get_job_by_id, rd, jdb, results
 import redis
 import requests
 import json
@@ -107,6 +107,56 @@ def get_car_by_vin(vin_number):
     else:
         return "No data available in Redis", 404
 
+@app.route('/jobs', methods=['GET', 'POST'])
+def submit_job():
+    """
+    Handles job submissions and retrievals.
+
+    Args:
+        None
+
+    Returns:
+        - For POST: Returns a success message if job is successfully added to queue. Returns a failure message if not.
+        - For GET: Returns the list of jobs if successful, otherwise returns a failure message.
+    """
+
+    if request.method == 'POST':
+        data = request.get_json()
+        if 'start_year' not in data or 'end_year' not in data:
+            return "Invalid data provided. Both start_year and end_year are required.", 400
+        start_year = data['start_year']
+        end_year = data['end_year']
+        add_job(start_year, end_year)
+        return "Job added to queue.", 200
+    elif request.method == 'GET':
+        job_list = []
+        for jid in jdb.keys():
+            job_list.append(json.loads(jdb.get(jid)))
+        return jsonify(job_list), 200
+    else:
+        return "Request not allowed", 405
+    
+@app.route('/jobs/<jobid>', methods=['GET'])
+def get_job(jobid):
+    """
+    Retrieves job information associated with a job id.
+
+    Args:
+        jobid (str): The unique identifier of the job to retrieve information for.
+
+    Returns:
+        Returns the job information in JSON format if job id is found, otherwise returns a failure message.
+    """
+    return get_job_by_id(jobid)
+
+@app.route('/results/<jobid>')
+def get_job_result(jobid):
+    
+    result = results.get(jobid)
+    if result is None:
+        return "No results found for the provided job ID", 404
+    else:
+        return jsonify(json.loads(result)), 200
 
 
 if __name__ == '__main__':
