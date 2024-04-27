@@ -16,8 +16,7 @@ def load_data_from_redis():
         return json.loads(data)
     return None
 
-@q.worker
-def do_work(jobid):
+def perform_analysis(jobid):
     update_job_status(jobid, 'pending')
 
     job_info = get_job_by_id(jobid)    
@@ -63,6 +62,10 @@ def do_work(jobid):
     else:
         update_job_status(jobid, 'failed')
         logging.debug("Job {jobid} failed due to missing data.")
+
+@q.worker
+def do_work(jobid):
+    perform_analysis(jobid)
 
 
 if __name__ == '__main__':
