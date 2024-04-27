@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: hello-rheasamuel-data
+  name: hello-iranarang-data
 spec:
   accessModes:
     - ReadWriteOnce
