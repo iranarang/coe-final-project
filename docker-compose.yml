@@ -17,7 +17,7 @@ services:
       - redis-db
     image: iranarang/api_app:1.0
     ports:
-      - "5000:5000"
+      - "5002:5002"
     volumes:
       - ./config.yaml:/config.yaml
     environment:
