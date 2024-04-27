@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from jobs import add_job, get_job_by_id, rd, jdb, results
+from jobs import add_job, get_job_by_id, rd, jdb, results, q
 import redis
 import requests
 import json
@@ -157,6 +157,13 @@ def get_job_result(jobid):
         return "No results found for the provided job ID", 404
     else:
         return jsonify(json.loads(result)), 200
+    
+@app.route('/clear', methods=['DELETE'])
+def clear_all():
+    if request.method == 'DELETE':
+        jdb.flushdb()    
+        results.flushdb()
+        return "Queue is cleared", 200
 
 
 if __name__ == '__main__':
