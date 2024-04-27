@@ -15,8 +15,8 @@ COPY /src/flask_api.py /app/flask_api.py
 COPY /src/worker.py /app/worker.py
 COPY /src/jobs.py /app/jobs.py
 
-# COPY /test/test_api.py /app/test_api.py
-# COPY /test/test_worker.py /app/test_worker.py
-# COPY /test/test_jobs.py /app/test_jobs.py
+COPY /test/test_flask_api.py /app/test_flask_api.py
+COPY /test/test_worker.py /app/test_worker.py
+COPY /test/test_jobs.py /app/test_jobs.py
 
 CMD ["python", "flask_api.py"]

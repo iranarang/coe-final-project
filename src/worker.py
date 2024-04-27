@@ -16,11 +16,8 @@ def load_data_from_redis():
         return json.loads(data)
     return None
 
-@q.worker
-def do_work(jobid):
-    update_job_status(jobid, 'pending')
-
-    job_info = get_job_by_id(jobid)    
+def perform_analysis(jobid):
+    job_info = get_job_by_id(jobid)
     start_year = int(job_info.get('start_year'))
     end_year = int(job_info.get('end_year'))
 
@@ -43,26 +40,33 @@ def do_work(jobid):
                     car_count_per_year[year][model] = 1
                 else:
                     car_count_per_year[year][model] += 1
-        
+
         # Plotting
         for model, counts_per_year in car_count_per_year.items():
             years = list(counts_per_year.keys())
             counts = list(counts_per_year.values())
             plt.plot(years, counts, label=model)
-        
+
         plt.xlabel('Year')
         plt.ylabel('Count')
         plt.title('Car Counts per Year for Each Model')
         plt.legend()
         plt.grid(True)
         plt.show()
-        
+
         store_job_result(jobid, car_count_per_year)
         update_job_status(jobid, 'complete')
         logging.debug(f"Job {jobid} completed successfully.")
-    else:
-        update_job_status(jobid, 'failed')
-        logging.debug("Job {jobid} failed due to missing data.")
+@q.worker
+def do_work(jobid):
+    update_job_status(jobid, 'pending')
+
+    job = get_job_by_id(jobid)
+    if job:
+        update_job_status(jobid, 'in progress')
+        logging.debug("Updated job status to in progress")
+        perform_analysis(job)
+        update_job_status(jobid, 'complete')
 
 
 if __name__ == '__main__':
