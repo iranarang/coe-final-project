@@ -15,7 +15,7 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - redis-db
-    image: rheasamuel/api_app:1.0
+    image: iranarang/api_app:1.0
     ports:
       - "5002:5002"
     volumes:
