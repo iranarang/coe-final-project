@@ -34,7 +34,7 @@ def perform_analysis(jobid):
         car_count_per_year = {}
         for entry in data['data']:
             year = int(entry[13])
-            model = entry[14]
+            model = entry[16]
             if year >= start_year and year <= end_year:
                 if year not in car_count_per_year:
                     car_count_per_year[year] = {}
@@ -44,17 +44,33 @@ def perform_analysis(jobid):
                     car_count_per_year[year][model] += 1
         
         # Plotting
-        for model, counts_per_year in car_count_per_year.items():
-            years = list(counts_per_year.keys())
-            counts = list(counts_per_year.values())
-            plt.plot(years, counts, label=model)
-        
+        json_car = json.dumps(car_count_per_year)
+        data = json.loads(json_car)
+
+        # Extract years and counts for BEV and PHEV
+        years = list(data.keys())
+        bev_counts = [data[year]["Battery Electric Vehicle (BEV)"] for year in years]
+        phev_counts = [data[year]["Plug-in Hybrid Electric Vehicle (PHEV)"] for year in years]
+
+        plt.plot(years, bev_counts, label='Battery Electric Vehicle (BEV)')
+        plt.plot(years, phev_counts, label='Plug-in Hybrid Electric Vehicle (PHEV)')
+
+        # Plotting
+        # plt.plot(years, bev_counts, label='Battery Electric Vehicle (BEV)')
+        # plt.plot(years, phev_counts, label='Plug-in Hybrid Electric Vehicle (PHEV)')
+        # for year, models in car_count_per_year.items():
+        #     for model, count in models.items():
+        #         plt.plot(year, count, marker='o', label=model)
+
+
         plt.xlabel('Year')
         plt.ylabel('Count')
-        plt.title('Car Counts per Year for Each Model')
+        plt.title('Car Counts for BEV and PHEV per Year')
         plt.legend()
         plt.grid(True)
+        plt.savefig('/app/plots/plot.png')
         plt.show()
+
         
         store_job_result(jobid, car_count_per_year)
         update_job_status(jobid, 'complete')
