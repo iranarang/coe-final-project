@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from jobs import add_job, get_job_by_id, rd, jdb, results, q
+from jobs import add_job, get_job_by_id, rd, jdb, results
 import redis
 import requests
 import json
@@ -10,10 +10,30 @@ from collections import OrderedDict
 app = Flask(__name__)
 rd = redis.Redis(host='redis-db', port=6379, db=0)
 
+@app.route('/help', methods=['GET'])
+def return_help():
+    """
+    This function returns a description of all the routes within
+
+    Returns:
+        dict: Description of routes
+    """
+    routes = {
+        "A POST request to /data will put data into Redis": "curl -X POST http://localhost:5002/data",
+        "A GET request to /data will return all data from Redis": "curl http://localhost:5002/data", 
+        "A DELETE request to /data will delete data in Redis":"curl -X DELETE http://localhost:5002/data", 
+        "A GET request to /vin will retrieve EV data from Redis and returns a list of VIN numbers.":"curl http://localhost:5002/vin",
+        "A GET request to /vin/<vin_number> return car data from Redis based on the provided VIN number.":"curl http://localhost:5002/vin/<vin_number>", 
+        "A GET request to /jobs should list all existing job IDs":"curl localhost:5002/jobs", 
+        "A POST request to /jobs should create a new job with a unique identifier (uuid)": "curl -X GET -d '{\"start_year\": \"2003\", \"end_year\": \"2007\"}' -H \"Content-Type: application/json\" localhost:5002/jobs",
+        "A GET request to /results should list the results from a specific jobid": "curl localhost:5002/results/<jobid>"
+    } 
+    return jsonify(routes)
+
 def load_data_into_redis():
     """
     This function obtains the data from the provided link and loads it into Redis.
-    
+
     Returns:
         bool: True if the data was successfully loaded into Redis, False otherwise.
     """
@@ -52,7 +72,7 @@ def handle_data():
     elif request.method == 'DELETE':
         rd.delete('ev_data')
         return "Data deleted from Redis", 200
-    
+
 @app.route('/vin', methods=['GET'])
 def get_vin():
     """
@@ -69,10 +89,10 @@ def get_vin():
         data = rd.get('ev_data')
         data_json = json.loads(data)
         for entry in data_json['data']:
-            vin_numbers.append(entry[8])  
+            vin_numbers.append(entry[8])
     else:
         return "No data available in Redis", 404
-    
+
     return jsonify(vin_numbers), 200
 
 @app.route('/vin/<vin_number>', methods=['GET'])
@@ -92,7 +112,7 @@ def get_car_by_vin(vin_number):
     if rd.exists('ev_data'):
         data = rd.get('ev_data')
         data_json = json.loads(data)
-        
+
         # Search for the provided VIN number in the dataset
         for entry in data_json['data']:
             if entry[8] == vin_number:
@@ -101,7 +121,7 @@ def get_car_by_vin(vin_number):
                 for index, key in enumerate(data_json['meta']['view']['columns']):
                     car_data[key['name']] = entry[index]
                 return jsonify(car_data), 200
-        
+
         # If VIN number not found, return 404
         return "Car with VIN number {} not found".format(vin_number), 404
     else:
@@ -135,7 +155,7 @@ def submit_job():
         return jsonify(job_list), 200
     else:
         return "Request not allowed", 405
-    
+
 @app.route('/jobs/<jobid>', methods=['GET'])
 def get_job(jobid):
     """
@@ -151,19 +171,12 @@ def get_job(jobid):
 
 @app.route('/results/<jobid>')
 def get_job_result(jobid):
-    
+
     result = results.get(jobid)
     if result is None:
         return "No results found for the provided job ID", 404
     else:
         return jsonify(json.loads(result)), 200
-    
-@app.route('/clear', methods=['DELETE'])
-def clear_all():
-    if request.method == 'DELETE':
-        jdb.flushdb()    
-        results.flushdb()
-        return "Queue is cleared", 200
 
 
 if __name__ == '__main__':
