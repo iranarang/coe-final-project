@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Deployment
+metadata:
+  name: redis-db-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-db-test
+  template:
+    metadata:
+      labels:
+        app: redis-db-test
+    spec:
+      containers:
+      - name: redis
+        image: redis:7
+        ports:
+        - containerPort: 6379
+
