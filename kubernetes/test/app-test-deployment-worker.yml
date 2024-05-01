@@ -1,9 +1,11 @@
-apiVersion: v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: worker-test
+  labels:
+    app: worker-test
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: worker-test
@@ -13,6 +15,6 @@ spec:
         app: worker-test
     spec:
       containers:
-      - name: worker
-        image: rheasamuel/test_worker:1.0
+      - name: worker-test
+        image: rheasamuel/api_worker:1.0
 
