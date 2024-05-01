@@ -1,0 +1,17 @@
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: app-test-ingress-flask
+spec:
+  rules:
+  - host: "rheasamuel-flask.coe332.tacc.cloud"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: flask-app-test
+            port:
+              number: 5002
+

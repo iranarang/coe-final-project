@@ -15,7 +15,7 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - redis-db
-    image: iranarang/api_app:1.0
+    image: rheasamuel/api_app:1.0
     ports:
       - "5002:5002"
     volumes:
@@ -30,7 +30,7 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - redis-db
-    image: iranarang/api_worker:1.0
+    image: rheasamuel/api_worker:1.0
     volumes:
       - ./src/worker.py:/app/worker.py 
       - ./plots:/app/plots
@@ -44,7 +44,7 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - redis-db
-    image: iranarang/test_app:1.0
+    image: rheasamuel/test_app:1.0
     volumes:
       - ./config.yaml:/config.yaml
     environment:
