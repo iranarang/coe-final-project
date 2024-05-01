@@ -34,34 +34,48 @@ def perform_analysis(jobid):
         car_count_per_year = {}
         for entry in data['data']:
             year = int(entry[13])
-            model = entry[14]
-            if year >= start_year and year <= end_year:
+            model = entry[16]
+            if start_year <= year <= end_year:
                 if year not in car_count_per_year:
-                    car_count_per_year[year] = {}
-                if model not in car_count_per_year[year]:
-                    car_count_per_year[year][model] = 1
-                else:
-                    car_count_per_year[year][model] += 1
+                    car_count_per_year[year] = {'Battery Electric Vehicle (BEV)': 0, 'Plug-in Hybrid Electric Vehicle (PHEV)': 0}
+                if model == "Battery Electric Vehicle (BEV)":
+                    car_count_per_year[year]['Battery Electric Vehicle (BEV)'] += 1
+                elif model == "Plug-in Hybrid Electric Vehicle (PHEV)":
+                    car_count_per_year[year]['Plug-in Hybrid Electric Vehicle (PHEV)'] += 1
         
+        ##update_job_status(jobid, 'complete')
+
         # Plotting
-        for model, counts_per_year in car_count_per_year.items():
-            years = list(counts_per_year.keys())
-            counts = list(counts_per_year.values())
-            plt.plot(years, counts, label=model)
-        
+        years = list(sorted(car_count_per_year.keys()))
+        logging.debug(f"years: {years}")
+        bev_counts = [car_count_per_year[year]['Battery Electric Vehicle (BEV)'] for year in years]
+        logging.debug(f"bev: {bev_counts}")
+
+        phev_counts = [car_count_per_year[year]['Plug-in Hybrid Electric Vehicle (PHEV)'] for year in years]
+        logging.debug(f"phev: {phev_counts}")
+
+        plt.xticks(range(min(years), max(years)+1, 1))
+
+        plt.plot(years, bev_counts, label='Battery Electric Vehicle (BEV)')
+        plt.plot(years, phev_counts, label='Plug-in Hybrid Electric Vehicle (PHEV)')
+
         plt.xlabel('Year')
         plt.ylabel('Count')
-        plt.title('Car Counts per Year for Each Model')
+        plt.title('Car Counts for BEV and PHEV per Year')
         plt.legend()
         plt.grid(True)
+        plt.savefig('/app/plots/plot.png')
         plt.show()
         
         store_job_result(jobid, car_count_per_year)
         update_job_status(jobid, 'complete')
+        
+        print("Completed job:", job_info)
+
         logging.debug(f"Job {jobid} completed successfully.")
     else:
         update_job_status(jobid, 'failed')
-        logging.debug("Job {jobid} failed due to missing data.")
+        logging.debug(f"Job {jobid} failed due to missing data.")
 
 @q.worker
 def do_work(jobid):

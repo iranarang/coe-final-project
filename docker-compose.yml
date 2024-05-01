@@ -33,6 +33,7 @@ services:
     image: iranarang/api_worker:1.0
     volumes:
       - ./src/worker.py:/app/worker.py 
+      - ./plots:/app/plots
     environment:
       - REDIS_IP=redis-db
     entrypoint: ["python", "worker.py"]  
