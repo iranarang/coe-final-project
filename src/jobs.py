@@ -66,4 +66,3 @@ def store_job_result(jid, car_count_per_year):
     Store the results from the worker file into the results Redis database.
     """
     results.set(jid, json.dumps(car_count_per_year))
-
