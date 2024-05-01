@@ -26,10 +26,8 @@ def test_perform_analysis():
     assert(job_id)
     plot_file_path = '/app/plots/plot.png'
 
-    # Create a mock plot file
-    with patch('builtins.open', mock_open(), create=True) as mock_file:
-        # Perform analysis (call the function you're testing)
-        perform_analysis(job_id)
+
+    perform_analysis(job_id)
 
     job_info = get_job_by_id(job_id)
     logging.debug(f"job info: {job_info}")
