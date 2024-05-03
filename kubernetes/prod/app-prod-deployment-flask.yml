@@ -17,4 +17,7 @@ spec:
         image: rheasamuel/api_app:1.0
         ports:
         - containerPort: 5002
+        env:
+        - name: REDIS_HOST
+          value: "<REDIS_SERVICE_IP>"
 
