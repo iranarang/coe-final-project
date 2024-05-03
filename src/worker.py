@@ -1,7 +1,8 @@
-from jobs import get_job_by_id, update_job_status, store_job_result, q, rd
+from jobs import get_job_by_id, update_job_status, q, rd, results
 import json
 import logging
 import matplotlib.pyplot as plt
+import io
 
 # Used ChatGPT to fix errors, to fix test cases, format data, and error handling
 
@@ -42,32 +43,40 @@ def perform_analysis(jobid):
                     car_count_per_year[year]['Battery Electric Vehicle (BEV)'] += 1
                 elif model == "Plug-in Hybrid Electric Vehicle (PHEV)":
                     car_count_per_year[year]['Plug-in Hybrid Electric Vehicle (PHEV)'] += 1
-        
-        ##update_job_status(jobid, 'complete')
 
-        # Plotting
+        logging.debug(f"car_count_per_year: {car_count_per_year}")
+
         years = list(sorted(car_count_per_year.keys()))
-        logging.debug(f"years: {years}")
         bev_counts = [car_count_per_year[year]['Battery Electric Vehicle (BEV)'] for year in years]
-        logging.debug(f"bev: {bev_counts}")
-
         phev_counts = [car_count_per_year[year]['Plug-in Hybrid Electric Vehicle (PHEV)'] for year in years]
+
+        logging.debug(f"years: {years}")
+        logging.debug(f"bev: {bev_counts}")
         logging.debug(f"phev: {phev_counts}")
 
-        plt.xticks(range(min(years), max(years)+1, 1))
+        max_bev_count = max(bev_counts)
+        min_phev_count = min(phev_counts)
+        new_min_y = min_phev_count - 100
+        new_max_y = max_bev_count + 100
 
-        plt.plot(years, bev_counts, label='Battery Electric Vehicle (BEV)')
-        plt.plot(years, phev_counts, label='Plug-in Hybrid Electric Vehicle (PHEV)')
+        plt.plot(years, bev_counts, label='Battery Electric Vehicle (BEV)', color='blue')
+        plt.plot(years, phev_counts, label='Plug-in Hybrid Electric Vehicle (PHEV)', color='green') 
+
+        plt.xlim(start_year, end_year)
+        plt.ylim(new_min_y, new_max_y)
 
         plt.xlabel('Year')
         plt.ylabel('Count')
         plt.title('Car Counts for BEV and PHEV per Year')
-        plt.legend()
+        plt.legend(['Battery Electric Vehicle', 'Plug-in-Hybrid Electric Vehicle'])
         plt.grid(True)
-        plt.savefig('/app/plots/plot.png')
-        plt.show()
+        plt.savefig('/plot.png')
         
-        store_job_result(jobid, car_count_per_year)
+        with open('/plot.png', 'rb') as f:
+            img = f.read()
+
+        results.hset(jobid, 'image', img)
+
         update_job_status(jobid, 'complete')
         
         print("Completed job:", job_info)

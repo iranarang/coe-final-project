@@ -5,7 +5,7 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
-from jobs import _generate_jid, _instantiate_job, _save_job, add_job, get_job_by_id, update_job_status, store_job_result, jdb, results
+from jobs import _generate_jid, _instantiate_job, _save_job, add_job, get_job_by_id, update_job_status, jdb, results
 
 # Used ChatGPT to fix errors, to fix test cases, format data, and error handling
 
@@ -74,15 +74,6 @@ def test_update_job_status():
     updated_job = get_job_by_id(job_id)
 
     assert updated_job["status"] == new_status
-
-def test_store_job_result():
-    jid = "test_id"
-    car_count_per_year = {"TESLA": 10, "AUDI": 20}
-
-    store_job_result(jid, car_count_per_year)
-    stored_result = json.loads(results.get(jid))
-
-    assert stored_result == car_count_per_year
 
 if __name__ == '__main__':
     pytest.main()

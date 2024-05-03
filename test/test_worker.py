@@ -24,13 +24,10 @@ def test_perform_analysis():
     job_id = job_dict["id"]
     logging.debug(f"job id: {job_id}")
     assert(job_id)
-    plot_file_path = '/app/plots/plot.png'
-
 
     perform_analysis(job_id)
 
     job_info = get_job_by_id(job_id)
     logging.debug(f"job info: {job_info}")
-    # assert( True if results.get(job_id) is not None else False )
 
-    # assert job_info['status'] == "complete"
+    assert job_info['status'] == "complete"

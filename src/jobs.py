@@ -4,6 +4,7 @@ import redis
 from hotqueue import HotQueue
 import os
 
+
 _redis_ip = os.environ.get('REDIS_IP', 'redis-db')
 _redis_port = '6379'
 
@@ -61,8 +62,3 @@ def update_job_status(jid, status):
     else:
         raise Exception()
 
-def store_job_result(jid, car_count_per_year):
-    """
-    Store the results from the worker file into the results Redis database.
-    """
-    results.set(jid, json.dumps(car_count_per_year))

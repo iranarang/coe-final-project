@@ -1,9 +1,10 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from jobs import add_job, get_job_by_id, rd, jdb, results
 import redis
 import requests
 import json
 from collections import OrderedDict
+import numpy as np
 
 # Used ChatGPT to fix errors, to fix test cases, format data, and error handling
 
@@ -113,16 +114,13 @@ def get_car_by_vin(vin_number):
         data = rd.get('ev_data')
         data_json = json.loads(data)
 
-        # Search for the provided VIN number in the dataset
         for entry in data_json['data']:
             if entry[8] == vin_number:
-                # Create a dictionary to hold keys and values
                 car_data = {}
                 for index, key in enumerate(data_json['meta']['view']['columns']):
                     car_data[key['name']] = entry[index]
                 return jsonify(car_data), 200
 
-        # If VIN number not found, return 404
         return "Car with VIN number {} not found".format(vin_number), 404
     else:
         return "No data available in Redis", 404
@@ -172,7 +170,13 @@ def get_job(jobid):
 @app.route('/results/<jobid>')
 def get_job_result(jobid):
 
-    result = results.get(jobid)
+    result = results.hget(jobid, 'image')
+    if result is not None:
+        path = f'/app/{jobid}.png'
+        with open(path, 'wb') as f:
+            f.write(results.hget(jobid, 'image'))
+        return send_file(path, mimetype='image/png', as_attachment=True)
+
     if result is None:
         return "No results found for the provided job ID", 404
     else:
