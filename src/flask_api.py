@@ -27,7 +27,7 @@ def return_help():
         "A GET request to /vin/<vin_number> return car data from Redis based on the provided VIN number.":"curl http://localhost:5002/vin/<vin_number>", 
         "A GET request to /jobs should list all existing job IDs":"curl localhost:5002/jobs", 
         "A POST request to /jobs should create a new job with a unique identifier (uuid)": "curl -X GET -d '{\"start_year\": \"2003\", \"end_year\": \"2007\"}' -H \"Content-Type: application/json\" localhost:5002/jobs",
-        "A GET request to /results should list the results from a specific jobid": "curl localhost:5002/results/<jobid>"
+        "A GET request to /results/<results_id> should list the results from a specific jobid": "curl localhost:5002/results/<jobid>",
     } 
     return jsonify(routes)
 
