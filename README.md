@@ -157,10 +157,36 @@ To run each route:
    Returns car data from Redis based on the provided VIN number.
 6. `curl localhost:5002/jobs`
    Lists all existing job IDs
-7. `curl localhost:5002/jobs -X POST -d '{"start_year": "2015", "end_year": "2018"}' -H "Content-Type: application/json"`
+7. `curl localhost:5002/jobs -X POST -d '{"start_year": "<start_year>", "end_year": "<end_year>"}' -H "Content-Type: application/json"`
    Posts a job with the the start and end year. Make sure to use the parameters start and end year.
 8. `curl localhost:5002/results/<job_id>`
    Returns the ‘Car Counts for BEV and PHEV per Year’ plot and car count per year for the specific job id from the worker file.
+
+	To access this plot, you must access the volume mounted inside the worker Docker container. First, enter the following:
+	
+	`docker ps -a`
+	
+	It should return something like this:
+	![Screenshot (138)](https://github.com/iranarang/coe-final-project/assets/143050090/c59c50b7-0e94-40b7-ab31-24777296739f)
+	
+	Then, copy the container ID of the worker container (in this case it would be 7e7d81805201). Now, enter:
+	
+	`docker exec -it <worker_id> /bin/bash`
+	
+	Then, enter with the path/to/location being where you want to save the file:
+	
+	`scp /app/plots/plot.png path/to/location`
+	If you are logged into the student login server using ssh, you can enter:
+	
+	`scp /app/plots/plot.png <username>@student-login.tacc.utexas.edu:~/`
+	
+	Then, if the plot was scp onto a ssh server, on your local device, enter the following:
+	
+	`scp <username>@student-login.tacc.utexas.edu:~/plot.png ./` 
+	
+	If the plot was scp onto the local device with the first step, the second step is not needed. The plot should now be saved onto the local device and ready to be accessed. 
+
+
 9. `curl localhost:5002/help`
    Lists all the routes within (all the routes previously shown)
 ### Using the application at a public endpoint
